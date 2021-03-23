@@ -43,28 +43,25 @@ class Agente:
 
             for n2 in sucesores :
                 if malla[n2.fila, n2.columna]==None and abiertos.count(n2)==0 :
-                    n2.puntPadreF=nActual.fila
-                    n2.puntPadreC=nActual.columna
-                    n2.g=nActual.g+nActual.costeArco(n2)
-                    n2.f=n2.g+n2.h(n2.fila, n2.columna, self.objetivo)
+                    #n2.puntPadreF=nActual.fila
+                    #n2.puntPadreC=nActual.columna
+                    #n2.g=nActual.g+nActual.costeArco(n2)
+                    #n2.f=n2.g+n2.h(n2.fila, n2.columna, self.objetivo)
                     abiertos.append(n2)
-                elif nActual.g+nActual.costeArco(n2)<n2.g :
-                    n2.puntPadreF=nActual.fila
-                    n2.puntPadreC=nActual.columna
-                    n2.g=nActual.g+nActual.costeArco(n2)
-                    n2.f=n2.g+n2.h(n2.fila, n2.columna, self.objetivo)
-
-                    if malla[n2.fila, n2.columna]!=None :
+                elif malla[n2.fila, n2.columna]!=None:
+                    n2viejo = malla[n2.fila, n2.columna]
+                    if n2.g<n2viejo.g:
                         malla[n2.fila, n2.columna]=None
                         abiertos.append(n2)
-            abiertos.sort(reverse = True)
-            if it==1:
-                for i in abiertos:
-                    print(i.fila)
-                    print(i.columna)
-                    print(i.g)
-                    print(i.f)
+                else:
+                    indice = abiertos.index(n2)
+                    n2viejo = abiertos.pop(indice)
+                    if n2.g<n2viejo.g:
+                        abiertos.append(n2)
+                    else:
+                        abiertos.append(n2viejo)
 
+            abiertos.sort(reverse = True)
 
         if exito==False :
             return None
@@ -76,4 +73,5 @@ class Agente:
             #print("Longitud de la solución: "+str(len(listaSol)))
             #print("Coste de la solución: "+ str(nActual.g))
             return [listaSol, datos]
+
 

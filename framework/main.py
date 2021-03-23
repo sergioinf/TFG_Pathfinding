@@ -11,12 +11,12 @@ def main():
     j.close()
     mapa = listamapas[3]
 
-    f= open("solucion.txt", "w")
+    inicial = NodoArbol(109, 177, -1, -1, 0, 0)
+    final = NodoArbol(96,133, -1, -1, 0, 0)
 
-    for i in range(0, 512):
-        f.write(''.join(mapa.mapa[i,:]))
-        f.write("\n")
-    f.close()
+    agente = Agente(inicial, final, mapa.mapa)
+
+    agente.aEstrella()
 
 
 # Press the green button in the gutter to run the script.

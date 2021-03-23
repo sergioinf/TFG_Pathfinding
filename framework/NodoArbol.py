@@ -42,31 +42,34 @@ class NodoArbol:
         sucesores=[]
         dimensiones = len(mapa)
 
+        nuevog=self.g+1000
         #Arriba
         if self.fila-1>=0 and mapa[self.fila-1, self.columna]=='.':
-            sucesores.append(NodoArbol(self.fila-1, self.columna, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1000))
+            sucesores.append(NodoArbol(self.fila-1, self.columna, self.fila, self.columna, self.h(self.fila-1, self.columna, objetivo)+nuevog, nuevog))
         #Abajo
         if self.fila+1<dimensiones and mapa[self.fila+1, self.columna]=='.':
-            sucesores.append(NodoArbol(self.fila+1, self.columna, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1000))
+            sucesores.append(NodoArbol(self.fila+1, self.columna, self.fila, self.columna, self.h(self.fila+1, self.columna, objetivo)+nuevog, nuevog))
         #Izquierda
         if self.columna-1>=0 and mapa[self.fila, self.columna-1]=='.':
-            sucesores.append(NodoArbol(self.fila, self.columna-1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1000))
+            sucesores.append(NodoArbol(self.fila, self.columna-1, self.fila, self.columna, self.h(self.fila, self.columna-1, objetivo)+nuevog, nuevog))
         #Derecha
         if self.columna+1<dimensiones and mapa[self.fila, self.columna+1]=='.':
-            sucesores.append(NodoArbol(self.fila, self.columna+1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1000))
+            sucesores.append(NodoArbol(self.fila, self.columna+1, self.fila, self.columna, self.h(self.fila, self.columna+1, objetivo)+nuevog, nuevog))
+
+        nuevog=self.g+1414
 
         #Arriba izquierda
         if self.fila-1>=0 and self.columna-1>=0 and mapa[self.fila-1, self.columna-1]=='.':
-            sucesores.append(NodoArbol(self.fila-1, self.columna-1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1414))
+            sucesores.append(NodoArbol(self.fila-1, self.columna-1, self.fila, self.columna, self.h(self.fila-1, self.columna-1, objetivo)+nuevog, nuevog))
         #Arriba derecha
         if self.fila-1>=0 and self.columna+1<dimensiones and mapa[self.fila-1, self.columna+1]=='.':
-            sucesores.append(NodoArbol(self.fila-1, self.columna+1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1414))
+            sucesores.append(NodoArbol(self.fila-1, self.columna+1, self.fila, self.columna, self.h(self.fila-1, self.columna+1, objetivo)+nuevog, nuevog))
         #Abajo izquierda
         if self.fila+1<dimensiones and self.columna-1>=0 and mapa[self.fila+1, self.columna-1]=='.':
-            sucesores.append(NodoArbol(self.fila+1, self.columna-1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1414))
+            sucesores.append(NodoArbol(self.fila+1, self.columna-1, self.fila, self.columna, self.h(self.fila+1, self.columna-1, objetivo)+nuevog, nuevog))
         #Abajo derecha
         if self.fila+1<dimensiones and self.columna+1<dimensiones and mapa[self.fila+1, self.columna+1]=='.':
-            sucesores.append(NodoArbol(self.fila+1, self.columna+1, self.fila, self.columna, self.h(self.fila, self.columna, objetivo), self.g+1414))
+            sucesores.append(NodoArbol(self.fila+1, self.columna+1, self.fila, self.columna, self.h(self.fila+1, self.columna+1, objetivo)+nuevog, nuevog))
 
         return sucesores
 

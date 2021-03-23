@@ -13,8 +13,9 @@ def calcular():
     j.close()
 
     mapa = listamapas[3]
+    mapa2 = listamapas[3]
     inicial = NodoArbol(109, 177, -1, -1, 0, 0)
-    final = NodoArbol(62,153, -1, -1, 0, 0)
+    final = NodoArbol(80,198, -1, -1, 0, 0)
     agente = Agente(inicial, final, mapa.mapa)
 
     #return agente.aEstrella()
