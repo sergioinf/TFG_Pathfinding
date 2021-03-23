@@ -58,6 +58,12 @@ class Agente:
                         malla[n2.fila, n2.columna]=None
                         abiertos.append(n2)
             abiertos.sort(reverse = True)
+            if it==1:
+                for i in abiertos:
+                    print(i.fila)
+                    print(i.columna)
+                    print(i.g)
+                    print(i.f)
 
 
         if exito==False :
@@ -69,6 +75,5 @@ class Agente:
             #print("Nodos expandidos: "+str(it))
             #print("Longitud de la solución: "+str(len(listaSol)))
             #print("Coste de la solución: "+ str(nActual.g))
-            #return listaSol
-            return datos
+            return [listaSol, datos]
 

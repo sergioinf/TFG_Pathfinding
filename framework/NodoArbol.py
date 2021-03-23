@@ -34,8 +34,8 @@ class NodoArbol:
         minimo = min(difFilas, difColumnas)
         maximo = max(difFilas, difColumnas)
 
-        return np.sqrt((difColumnas**2)+(difFilas**2))  #Euclidea
-        #return minimo*1414+(maximo-minimo)*1000         #Octil
+        #return np.sqrt((difColumnas**2)+(difFilas**2))  #Euclidea
+        return minimo*1414+(maximo-minimo)*1000         #Octil
         #return difColumnas+difFilas  #Manhattan
 
     def calculaSucesores(self, mapa, objetivo):
