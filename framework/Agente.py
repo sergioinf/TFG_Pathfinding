@@ -14,8 +14,6 @@ class Agente:
         else:
             return False
 
-
-
     def recuperaSolucion(self, nodo, lista, malla):
         lista.append(nodo)
         if nodo.puntPadreF == -1 :
@@ -74,4 +72,5 @@ class Agente:
             #print("Coste de la solución: "+ str(nActual.g))
             return [listaSol, datos]
 
-
+    def hpaEstrealla(self):
+        return 0

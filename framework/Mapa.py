@@ -15,3 +15,8 @@ class Mapa:
 
     def getMapa(self):
         return self.mapa
+
+
+class MapaHPA:
+    def __init__(self, n, d, m):
+        Mapa.__init__(self, n, d, m)

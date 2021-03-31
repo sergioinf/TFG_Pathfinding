@@ -2,10 +2,9 @@
 import numpy as np
 
 class NodoArbol:
-    def __init__(self, fila, columna, padreF, padreC, estimacion, camino):
+    def __init__(self, fila, columna, padreF=-1, padreC=-1, estimacion=0, camino=0):
         self.f=estimacion
         self.g=camino
-        self.cerrado=False
         self.fila=fila
         self.columna=columna
         self.puntPadreF=padreF

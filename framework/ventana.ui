@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>330</y>
+      <x>130</x>
+      <y>300</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -30,14 +30,27 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>240</y>
+      <x>130</x>
+      <y>190</y>
       <width>231</width>
       <height>71</height>
      </rect>
     </property>
     <property name="text">
      <string>Ejecuta el programa para A*</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="imagen">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>20</y>
+      <width>512</width>
+      <height>512</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

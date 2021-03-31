@@ -1,21 +1,20 @@
 import pickle
-
+from PIL import Image
 import TratadorMapas
-
+import matplotlib.pyplot as plt
 from Agente import *
 
 from NodoArbol import *
 
 def calcular():
 
-    j = open("mapas.txt", "rb")
+    j = open("mapas\\mapasBase.txt", "rb")
     listamapas=pickle.load(j)
     j.close()
 
     mapa = listamapas[3]
-    mapa2 = listamapas[3]
-    inicial = NodoArbol(109, 177, -1, -1, 0, 0)
-    final = NodoArbol(80,198, -1, -1, 0, 0)
+    inicial = NodoArbol(197, 319)
+    final = NodoArbol(201,87)
     agente = Agente(inicial, final, mapa.mapa)
 
     #return agente.aEstrella()
@@ -32,4 +31,18 @@ def calcular():
         f.write("\n")
     f.close()
 
-    return resultado[1]
+    mapa2 = np.empty([mapa.dimensiones, mapa.dimensiones], dtype=int)
+
+    for i in range(0, 512):
+        for j in range(0, 512):
+            if mapa.mapa[i,j]=='@':
+                mapa2[i,j]=0
+            elif mapa.mapa[i,j]=='.':
+                mapa2[i,j]=255
+            else:
+                mapa2[i,j] =ord(mapa.mapa[i,j])
+
+    plt.imsave("prueba.jpg", mapa2, cmap='Greys')
+    ventana=[resultado[1], "prueba.jpg"]
+
+    return ventana

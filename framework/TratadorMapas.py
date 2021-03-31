@@ -9,10 +9,17 @@ def main():
     number_of_files = len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
     listaMapas = []
-    for i in range(1, number_of_files+1):
+    for i in range(1, number_of_files):
         listaMapas.append(leerMapa("BGMAP ("+str(i)+").map"))
 
-    f = open("mapas\\mapas.txt", "wb")
+    f= open("prueba.txt", "w")
+
+    for i in range(0, 512):
+        f.write(''.join(listaMapas[0].mapa[i,:]))
+        f.write("\n")
+    f.close()
+
+    f = open("mapas\\mapasBase.txt", "wb")
     pickle.dump(listaMapas, f)
     f.close()
 
@@ -21,13 +28,15 @@ def leerMapa(nombreFichero):
     fichero = open("mapas\\"+nombreFichero)
     leido = fichero.readlines()
 
-    longitud =  len(leido)-4
-    mapa = np.empty([longitud, longitud], dtype=str)
+    longitud =  len(leido)
+    mapa = np.empty([longitud-4, longitud-4], dtype=str)
 
+    j=0
     for i in range(4,longitud):
-        mapa[i-4,:] = list(leido[i][0:512])
+        mapa[j,:] = list(leido[i][0:512])
+        j+=1
 
-    return Mapa(nombreFichero, longitud, mapa)
+    return Mapa(nombreFichero, longitud-4, mapa)
 
 
 
