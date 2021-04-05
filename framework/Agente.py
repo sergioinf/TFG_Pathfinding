@@ -1,9 +1,9 @@
 
 import numpy as np
-from NodoArbol import NodoArbol
+from Nodos import NodoArbol
 
 class Agente:
-    def __init__(self, i, o, m):
+    def __init__(self, i=None, o=None, m=None):
         self.inicial=i
         self.objetivo=o
         self.mapa = m
@@ -70,7 +70,7 @@ class Agente:
             #print("Nodos expandidos: "+str(it))
             #print("Longitud de la solución: "+str(len(listaSol)))
             #print("Coste de la solución: "+ str(nActual.g))
-            return [listaSol, datos]
+            return [listaSol, datos, nActual.g]
 
     def hpaEstrealla(self):
         return 0

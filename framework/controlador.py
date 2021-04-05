@@ -4,11 +4,11 @@ import TratadorMapas
 import matplotlib.pyplot as plt
 from Agente import *
 
-from NodoArbol import *
+from Nodos import *
 
 def calcular():
 
-    j = open("mapas\\mapasBase.txt", "rb")
+    j = open("mapasTratados\\mapasBase.txt", "rb")
     listamapas=pickle.load(j)
     j.close()
 
