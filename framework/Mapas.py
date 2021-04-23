@@ -8,7 +8,7 @@ class Mapa:
 
 
 class MapaHPA():
-    def __init__(self, n, d, m, grafo=Graph(), tamCluster=0, clusters=0):
+    def __init__(self, n, d, m, grafo=Graph(), tamCluster=0, clusters=[]):
         self.nombre = n
         self.dimensiones = d
         self.mapa = m

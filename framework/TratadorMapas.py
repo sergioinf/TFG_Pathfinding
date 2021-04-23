@@ -1,38 +1,45 @@
 import pickle
-
+from Grafo import *
 from Mapas import *
 import numpy as np
 import os
-
+import sys
 
 def main():
+
+    sys.setrecursionlimit(30000)
+
+
     directory = "mapas"
     number_of_files = len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
     listaMapas = []
     listaMapasHPA = []
-    for i in range(1, number_of_files):
+    for i in range(4, 6):
 
         nombre = "BGMAP ("+str(i)+").map"
         mapa = leerMapa(nombre)
         l = len(mapa)
 
         print(nombre)
+        grafo = Graph({}, 0)
         listaMapas.append(Mapa(nombre, l, mapa))
-        listaMapasHPA.append(crearMapaHPA(nombre, l, mapa))
+        listaMapasHPA.append(crearMapaHPA(nombre, mapa, grafo))
 
-    f = open("mapasTratados\\mapasBase.txt", "wb")
+    f = open("mapasTratados\\mapasBase1.txt", "wb")
     pickle.dump(listaMapas, f)
     f.close()
 
-    c = open("mapasTratados\\mapasHPA.txt", "wb")
+    c = open("mapasTratados\\mapasHPA1.txt", "wb")
     pickle.dump(listaMapasHPA, c)
     c.close()
+    print("Leidos los mapas de la carpeta mapas")
 
 
 def leerMapa(nombreFichero):
     fichero = open("mapas\\"+nombreFichero)
     leido = fichero.readlines()
+    fichero.close()
 
     longitud =  len(leido)
     mapa = np.empty([longitud-4, longitud-4], dtype=str)
@@ -45,11 +52,12 @@ def leerMapa(nombreFichero):
     return mapa
 
 
-def crearMapaHPA(nombre, l, mapa):
+def crearMapaHPA(nombre, m, grafo):
 
-    tamaños = divisores(l)
-    tamañoCluster = tamaños[7]
-    pGrande = 3
+    mapa = m.copy()
+    tamaños = divisores(len(mapa))
+    tamañoCluster = tamaños[5]  #32 es el tamaño de cluster con la pos 5
+    pGrande = 12
 
     clusters = []
     numClustersPorFila = len(mapa) // tamañoCluster
@@ -63,29 +71,29 @@ def crearMapaHPA(nombre, l, mapa):
             mapaPintar[i,j] = 0
 
     indice = 1
-    grafo = Graph()
 
     for i in clusters:
         if i[1] + tamañoCluster < len(mapa):
 
             clusterActual = (i[0] // tamañoCluster)*numClustersPorFila+(i[1] // tamañoCluster)
             ##Conexiones horizontales
-            mapaPintar, indice, grafo= calculaPuertas(mapa, mapaPintar, tamañoCluster, indice, pGrande, i[0], i[1], grafo, clusterActual, False)
+            mapaPintar, indice, grafo= calculaPuertas2(mapa, mapaPintar, tamañoCluster, indice, pGrande, i[0], i[1], grafo, clusterActual, False)
             ##Conexiones verticales
             mapaPintar = np.transpose(mapaPintar)
             mapa = np.transpose(mapa)
             clusterActual = (i[1] // tamañoCluster)*numClustersPorFila+(i[0] // tamañoCluster)
 
-            mapaPintar, indice, grafo= calculaPuertas(mapa, mapaPintar, tamañoCluster, indice, pGrande, i[0], i[1], grafo, clusterActual, True)
+            mapaPintar, indice, grafo= calculaPuertas2(mapa, mapaPintar, tamañoCluster, indice, pGrande, i[0], i[1], grafo, clusterActual, True)
             mapaPintar = np.transpose(mapaPintar)
             mapa = np.transpose(mapa)
 
 
     agente = Agente(m=mapa)
+    print("Encontrado todas las puertas y creado el agente")
+    añadirConexionesIntraClusters(agente, grafo, numClustersPorFila, tamañoCluster)
+    print("Creadas las conexiones dentro de los clusters")
 
-    añadirConexionesIntraClusters(agente, grafo)
-
-    return MapaHPA(nombre, l, mapa, grafo, tamañoCluster, len(clusters))
+    return MapaHPA(nombre, len(mapa), mapa, grafo, tamañoCluster, clusters)
 
 def divisores(n):
     divisores = []
@@ -95,6 +103,7 @@ def divisores(n):
     return divisores
 
 def añadirAlGrafo(grafo, fil, col, n1, n2, clusterActual, traspuesta, clustersPorFila):
+
     g = grafo.__copy__()
 
     if traspuesta:
@@ -106,144 +115,119 @@ def añadirAlGrafo(grafo, fil, col, n1, n2, clusterActual, traspuesta, clustersP
 
         Nodo2 = NodoGrafo('N'+str(n2),fil, col+1, cluster=clusterActual+1)
 
-    esta1 = g.get_vertex(Nodo)!= None
-    esta2 = g.get_vertex(Nodo2)!=None
+    a1 = NodoArbol(Nodo.fila, Nodo.columna)
+    a2 = NodoArbol(Nodo2.fila, Nodo2.columna)
 
-    #print(Nodo.cluster)
-    #print(Nodo2.cluster)
-    if esta1 and esta2:
-        g.add_edge(Nodo, Nodo2, 1)
-    elif esta1:
-        g.add_vertex(Nodo2)
-        g.add_edge(Nodo, Nodo2, 1)
-    elif esta2:
-        g.add_vertex(Nodo)
-        g.add_edge(Nodo, Nodo2, 1)
-    else:
-        g.add_vertex(Nodo)
-        g.add_vertex(Nodo2)
-        g.add_edge(Nodo, Nodo2, 1)
+    g.add_edge(Nodo, Nodo2, 1000, [a1, a2])
+
     return g
 
-def calculaPuertas(mapa, mapaPintar, tamañoCluster, indice, pGrande, i0, i1, grafo, clusterActual, traspuesta):
+def calculaPuertas2(mapa, mapaPintar, tamañoCluster, indice, pGrande, i0, i1, grafo, clusterActual, traspuesta):
     c = 0
     for j in range(i0, i0 + tamañoCluster):
-        if i1 + tamañoCluster == len(mapaPintar):
-            break
 
         columna = i1 + tamañoCluster - 1
         if mapa[j,columna] == '.' and mapa[j,columna + 1] == '.':
             c += 1
+            if j==(i0 + tamañoCluster-1):
+                if c>=pGrande:
+                    if mapaPintar[j,columna] == 0:
+                        mapaPintar[j,columna] = indice
+                        indice += 1
+                    if mapaPintar[j,columna+1] == 0:
+                        mapaPintar[j,columna+1] = indice
+                        indice += 1
+                    if mapaPintar[j-c+1,columna] == 0:
+                        mapaPintar[j - c+1,columna] = indice
+                        indice += 1
+                    if mapaPintar[j-c+1,columna + 1] == 0:
+                        mapaPintar[j - c+1,columna + 1] = indice
+                        indice += 1
+
+
+                    fil = j
+                    grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
+
+                    fil = j-c+1
+                    grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
+
+                    c = 0
+                else:
+                    dif = c//2
+                    if mapaPintar[j-dif,columna] == 0:
+                        mapaPintar[j-dif,columna] = indice
+                        indice += 1
+                    if mapaPintar[j-dif,columna + 1] == 0:
+                        mapaPintar[j-dif,columna + 1] = indice
+                        indice += 1
+
+                    #Añadiendo en el grafo
+                    fil = j-dif
+                    grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
+
+                    c = 0
         else:
-            if c == 1:
-                if mapaPintar[j - 1,columna] == 0:
+            if c>=pGrande:
+                if mapaPintar[j-1,columna] == 0:
                     mapaPintar[j - 1,columna] = indice
                     indice += 1
-                if mapaPintar[j - 1,columna + 1] == 0:
-                    mapaPintar[j - 1,columna + 1] = indice
+                if mapaPintar[j-1,columna+1] == 0:
+                    mapaPintar[j - 1,columna+1] = indice
                     indice += 1
-                c = 0
-                #Añadiendo en el grafo
+                if mapaPintar[j-c,columna] == 0:
+                    mapaPintar[j - c,columna] = indice
+                    indice += 1
+                if mapaPintar[j-c,columna + 1] == 0:
+                    mapaPintar[j - c,columna + 1] = indice
+                    indice += 1
+
 
                 fil = j-1
-                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[j - 1,columna], mapaPintar[j - 1,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
+                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
 
-        if c == tamañoCluster:
-            if mapaPintar[j,columna] == 0:
-                mapaPintar[j,columna] = indice
-                indice += 1
-            if mapaPintar[j,columna + 1] == 0:
-                mapaPintar[j,columna + 1] = indice
-                indice += 1
-            if mapaPintar[j - c + 1,columna] == 0:
-                mapaPintar[j - c + 1,columna] = indice
-                indice += 1
-            if mapaPintar[j - c + 1,columna + 1] == 0:
-                mapaPintar[j - c + 1,columna + 1] = indice
-                indice += 1
+                fil = j-c
+                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
 
-
-            #Añadiendo en el grafo
-            fil = j
-            grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[j,columna], mapaPintar[j,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
-
-             #Añadiendo en el grafo
-            fil = j - c + 1
-            grafo =añadirAlGrafo(grafo, fil, columna, mapaPintar[j - c + 1,columna], mapaPintar[j - c + 1,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
-
-        elif j % tamañoCluster + 1 == tamañoCluster and c != 0:
-            if c >= pGrande:
-                if mapaPintar[j,columna] == 0:
-                    mapaPintar[j,columna] = indice
+                c = 0
+            elif c>0 and c<pGrande:
+                dif = c//2
+                if mapaPintar[j - 1-dif,columna] == 0:
+                    mapaPintar[j - 1-dif,columna] = indice
                     indice += 1
-                if mapaPintar[j,columna + 1] == 0:
-                    mapaPintar[j,columna + 1] = indice
-                    indice += 1
-                if mapaPintar[j - c + 1,columna] == 0:
-                    mapaPintar[j - c + 1,columna] = indice
-                    indice += 1
-                if mapaPintar[j - c + 1,columna + 1] == 0:
-                    mapaPintar[j - c + 1,columna + 1] = indice
-                    indice += 1
-
-
-                #Añadiendo en el grafo
-                fil = j
-                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[j,columna], mapaPintar[j,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
-
-
-                 #Añadiendo en el grafo
-                fil = j - c + 1
-                grafo =añadirAlGrafo(grafo, fil, columna, mapaPintar[j - c + 1,columna], mapaPintar[j - c + 1,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
-
-            else:
-                if mapaPintar[j - (c // 2),columna] == 0:
-                    mapaPintar[j - (c // 2),columna] = indice
-                    indice += 1
-                if mapaPintar[j - (c // 2),columna + 1] == 0:
-                    mapaPintar[j - (c // 2),columna + 1] = indice
+                if mapaPintar[j - 1-dif,columna + 1] == 0:
+                    mapaPintar[j - 1-dif,columna + 1] = indice
                     indice += 1
 
                 #Añadiendo en el grafo
-                fil = j - (c // 2)
-                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[j - (c // 2),columna], mapaPintar[j - (c // 2),columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
+                fil = j - 1-dif
+                grafo = añadirAlGrafo(grafo, fil, columna, mapaPintar[fil,columna], mapaPintar[fil,columna + 1], clusterActual, traspuesta, len(mapa)//tamañoCluster)
 
+                c = 0
 
     return mapaPintar, indice, grafo
 
-def leerMapa():
-    fichero = open("mapas\\BGMAP (1).map")
-    leido = fichero.readlines()
-
-    longitud =  len(leido)
-    mapa = np.empty([longitud-4, longitud-4], dtype=str)
-
-    j=0
-    for i in range(4,longitud):
-        mapa[j,:] = list(leido[i][0:512])
-        j+=1
-
-    return mapa
-
-def añadirConexionesIntraClusters(agente, grafo):
+def añadirConexionesIntraClusters(agente, grafo, numClusters, tamCluster):
         vertices = grafo.get_vertices()
-        aux = 1
+        clusters = []
 
-        lista = []
+        for i in range(0, numClusters**2):
+            clusters.append([])
+
         for i in vertices:
-            lista.append(i)
+            clusters[i.cluster-1].append(i)
 
-        for i in lista:
-            for j in lista[aux:len(lista)]:
-                print(aux)
-                if i.cluster == j.cluster:
-                    agente.inicial=NodoArbol(i.fila, i.columna)
-                    agente.objetivo=NodoArbol(j.fila, j.columna)
-                    sol = agente.aEstrella()
-                    if sol!=None:
-                        grafo.add_edge(i, j, sol[2])
-            aux+=1
+        """for c in clusters:
+            print(c)"""
 
+        for c in clusters:
+            while len(c)>1:
+                inicio = c.pop()
+                agente.inicial=NodoArbol(inicio.fila, inicio.columna)
+                resultados = agente.dijkstra(c, (inicio.fila//tamCluster)*tamCluster, (inicio.columna//tamCluster)*tamCluster, tamCluster)
+                if resultados!=None:
+                    for r in resultados:
+                        grafo.add_edge(inicio, r[0], r[2], r[1])
+        return grafo
 
 if __name__ == '__main__':
     main()

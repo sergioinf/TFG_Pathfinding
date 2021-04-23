@@ -9,17 +9,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         self.setupUi(self)
-        self.label.setText("Haz click en el botón para ejecutar A*")
-        self.pushButton.setText("Púlsame")
+        self.datosAEstrella.setText("Haz click en el botón para ejecutar A*")
+        self.ejecutaAEstrella.setText("Púlsame")
 
+        self.datosHPA.setText("Haz click en el botón para ejecutar HPA*")
+        self.ejecutaHPA.setText("Púlsame")
 
-        self.pushButton.clicked.connect(self.actualizar)
+        self.ejecutaAEstrella.clicked.connect(self.actualizarAEstrella)
+        self.ejecutaHPA.clicked.connect(self.actualizarHPA)
 
-    def actualizar(self):
-        self.label.setText("Ejecutando algoritmo, por favor espere")
-        escribir = calcular()
-        self.label.setText(escribir[0])
-        self.imagen.setPixmap(QtGui.QPixmap(escribir[1]))
+    def actualizarAEstrella(self):
+        self.datosAEstrella.setText("Ejecutando algoritmo, por favor espere")
+        escribir = calcularA()
+        self.datosAEstrella.setText(escribir[0])
+        self.mapaAEstrella.setPixmap(QtGui.QPixmap(escribir[1]))
+
+    def actualizarHPA(self):
+        self.datosHPA.setText("Ejecutando algoritmo, por favor espere")
+        escribir = calcularHPA()
+        self.datosHPA.setText(escribir[0])
+        self.mapaHPA.setPixmap(QtGui.QPixmap(escribir[1]))
 
 
 

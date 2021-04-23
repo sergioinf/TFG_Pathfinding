@@ -1,5 +1,6 @@
 
 import numpy as np
+from Grafo import *
 
 class NodoArbol:
     def __init__(self, fila, columna, padreF=-1, padreC=-1, estimacion=0, camino=0):
@@ -11,7 +12,10 @@ class NodoArbol:
         self.puntPadreC=padreC
 
     def __str__(self):
-        return str(self.fila)+", "+str(self.columna)
+        return str(self.fila)+":"+str(self.columna)
+
+    def __repr__(self):
+        return str(self)
 
     def __lt__(self, other):
         if self.f==other.f:
@@ -24,6 +28,9 @@ class NodoArbol:
             return self.fila==other.fila and self.columna==other.columna
         else:
             return False
+
+    def __hash__(self):
+        return hash(self.fila)+hash(self.columna)
 
     def h(self, fila, columna, objetivo):
 
@@ -72,6 +79,49 @@ class NodoArbol:
 
         return sucesores
 
+    def calculaSucesoresDijkstra(self, mapa, fIC, cIC, tamCluster):
+        sucesores=[]
+
+        nuevog=self.g+1000
+        #Arriba
+        if self.fila-1>=fIC and mapa[self.fila-1, self.columna]=='.':
+            sucesores.append(NodoArbol(self.fila-1, self.columna, self.fila, self.columna, 0, nuevog))
+        #Abajo
+        if self.fila+1<fIC+tamCluster and mapa[self.fila+1, self.columna]=='.':
+            sucesores.append(NodoArbol(self.fila+1, self.columna, self.fila, self.columna, 0, nuevog))
+        #Izquierda
+        if self.columna-1>=cIC and mapa[self.fila, self.columna-1]=='.':
+            sucesores.append(NodoArbol(self.fila, self.columna-1, self.fila, self.columna, 0, nuevog))
+        #Derecha
+        if self.columna+1<cIC+tamCluster and mapa[self.fila, self.columna+1]=='.':
+            sucesores.append(NodoArbol(self.fila, self.columna+1, self.fila, self.columna, 0, nuevog))
+
+        nuevog=self.g+1414
+
+        #Arriba izquierda
+        if self.fila-1>=fIC and self.columna-1>=cIC and mapa[self.fila-1, self.columna-1]=='.':
+            sucesores.append(NodoArbol(self.fila-1, self.columna-1, self.fila, self.columna, 0, nuevog))
+        #Arriba derecha
+        if self.fila-1>=fIC and self.columna+1<cIC+tamCluster and mapa[self.fila-1, self.columna+1]=='.':
+            sucesores.append(NodoArbol(self.fila-1, self.columna+1, self.fila, self.columna, 0, nuevog))
+        #Abajo izquierda
+        if self.fila+1<fIC+tamCluster and self.columna-1>=cIC and mapa[self.fila+1, self.columna-1]=='.':
+            sucesores.append(NodoArbol(self.fila+1, self.columna-1, self.fila, self.columna, 0, nuevog))
+        #Abajo derecha
+        if self.fila+1<fIC+tamCluster and self.columna+1<cIC+tamCluster and mapa[self.fila+1, self.columna+1]=='.':
+            sucesores.append(NodoArbol(self.fila+1, self.columna+1, self.fila, self.columna, 0, nuevog))
+
+        return sucesores
+
+    def calculaSucesoresHPA(self,nActual, grafo, nodoObjetivo):
+        v, sucesores = grafo.get_sucesores(nActual.fila, nActual.columna)
+        A = []
+        for i in sucesores:
+            coste = i.get_weight(v)+nActual.g
+            nodo = NodoArbol(i.id.fila, i.id.columna, nActual.fila, nActual.columna, self.h(i.id.fila, i.id.columna, nodoObjetivo)+coste, coste)
+            A.append(nodo)
+        return A
+
     def costeArco(self, nDestino):
         movX=abs(self.fila-nDestino.fila)
         movY=abs(self.columna-nDestino.columna)
@@ -91,7 +141,8 @@ class NodoGrafo:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.nombre==other.nombre
+            #return self.nombre==other.nombre
+            return self.fila==other.fila and self.columna==other.columna
         else:
             return False
 
@@ -100,12 +151,8 @@ class NodoGrafo:
 
     def __str__(self):
         return self.nombre+" Cluster: "+str(self.cluster)+" Fila: "+str(self.fila)+" Columna: "+str(self.columna)
+        #return self.nombre
 
     def __repr__(self):
         return str(self)
 
-    def añadirConexion(self, arco):
-        self.listaSucesores.append(arco)
-
-    def eliminarConexion(self, arco):
-        pass

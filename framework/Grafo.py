@@ -3,15 +3,15 @@ from Agente import *
 
 
 class Vertex:
-    def __init__(self, node):
+    def __init__(self, node=NodoGrafo):
         self.id = node
         self.adjacent = {}
 
     def __str__(self):
         return str(self.id) + ' adjacent: ' + str([x.id for x in self.adjacent])
 
-    def add_neighbor(self, neighbor, weight=0):
-        self.adjacent[neighbor] = weight
+    def add_neighbor(self, neighbor, weight=0, camino = []):
+        self.adjacent[neighbor] = (weight, camino)
 
     def get_connections(self):
         return self.adjacent.keys()
@@ -20,7 +20,10 @@ class Vertex:
         return self.id
 
     def get_weight(self, neighbor):
-        return self.adjacent[neighbor]
+        return self.adjacent[neighbor][0]
+
+    def get_camino(self, neighbor):
+        return self.adjacent[neighbor][1]
 
 class Graph:
     def __init__(self, v = {}, n = 0):
@@ -45,14 +48,20 @@ class Graph:
         else:
             return None
 
-    def add_edge(self, frm, to, cost = 0):
+    def get_verticeComp(self, fila, columna):
+        for i in self.vert_dict.keys():
+            if i.fila==fila and i.columna==columna: return self.get_vertex(i)
+        print("No cuela")
+        return None
+
+    def add_edge(self, frm, to, cost = 0, camino = []):
         if frm not in self.vert_dict:
             self.add_vertex(frm)
         if to not in self.vert_dict:
             self.add_vertex(to)
 
-        self.vert_dict[frm].add_neighbor(self.vert_dict[to], cost)
-        self.vert_dict[to].add_neighbor(self.vert_dict[frm], cost)
+        self.vert_dict[frm].add_neighbor(self.vert_dict[to], cost, camino)
+        self.vert_dict[to].add_neighbor(self.vert_dict[frm], cost, camino.reverse())
 
     def get_vertices(self):
         return self.vert_dict.keys()
@@ -60,21 +69,6 @@ class Graph:
     def get_dict(self):
         return self.vert_dict
 
-    def añadirConexionesIntraClusters(self, agente):
-        vertices = self.get_vertices()
-        aux = 1
-
-        lista = []
-        for i in vertices:
-            lista.append(i)
-
-        for i in lista:
-            for j in lista[aux:len(lista)]:
-                if i.cluster == j.cluster:
-                    agente.inicial=NodoArbol(i.fila, i.columna)
-                    agente.objetivo=NodoArbol(j.fila, j.columna)
-                    sol = agente.aEstrella()
-                    if sol!=None:
-                        self.add_edge(i, j, sol[2])
-            aux+=1
-
+    def get_sucesores(self, fila, columna):
+        v = self.get_verticeComp(fila, columna)
+        return v, v.get_connections()
