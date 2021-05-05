@@ -1,3 +1,4 @@
+import time
 
 import numpy as np
 
@@ -26,6 +27,7 @@ class Agente:
             return self.recuperaSolucion(malla[nodo.puntPadreF, nodo.puntPadreC], lista, malla)
 
     def aEstrella(self):
+        t_0 = time.time()
         longitud = len(self.mapa)
         malla = np.empty([longitud, longitud], dtype=NodoArbol)
         abiertos = [self.inicial]
@@ -34,6 +36,8 @@ class Agente:
 
         while len(abiertos)>0 :
             it+=1
+            """if it == 10000:
+                break"""
             nActual = abiertos.pop()
             malla[nActual.fila, nActual.columna]=nActual
 
@@ -66,15 +70,14 @@ class Agente:
             abiertos.sort(reverse = True)
 
         if exito==False :
+            t_1=time.time()
             return None
         else :
             listaSol = self.recuperaSolucion(nActual, [], malla)
+            t_1 = time.time()
             datos ="Nodos expandidos: "+str(it)+"\n"+"Longitud de la solución: "+str(len(listaSol))+"\n"+"Coste de la solución: "+ str(nActual.g)+"\n"
 
-            #print("Nodos expandidos: "+str(it))
-            #print("Longitud de la solución: "+str(len(listaSol)))
-            #print("Coste de la solución: "+ str(nActual.g))
-            return [listaSol, datos, nActual.g]
+            return [listaSol, datos, nActual.g, t_1-t_0, it]
 
     def dijkstra(self, listaObjetivos, fIC, cIC, tamCluster):
         nActual = self.inicial
@@ -83,10 +86,11 @@ class Agente:
         caminos = []
         contador = 0
         exito = False
+        it=0
 
         while len(abiertos)>0:
+            it+=1
             nActual = abiertos.pop()
-            #print(listaObjetivos)
             malla[nActual.fila, nActual.columna] = nActual
             esFinal = self.esFinalDijkstra(nActual, listaObjetivos)
             if esFinal[1]:
@@ -114,9 +118,9 @@ class Agente:
             abiertos.sort(reverse = True)
 
         if exito==True:
-            return caminos
+            return caminos, it
         else:
-            return None
+            return None, it
 
     def esFinalDijkstra(self, nodo, lista=[]):
         for i in lista:
@@ -125,6 +129,7 @@ class Agente:
         return (0, False)
 
     def hpaEstrella(self, grafo):
+        t_0 = time.time()
         longitud = len(self.mapa)
         malla = np.empty([longitud, longitud], dtype=NodoArbol)
         abiertos = [self.inicial]
@@ -173,10 +178,10 @@ class Agente:
                 if sig == None:
                     sig = nodo2.get_camino(nodo1)
                 listaSol = listaSol+sig
-
+            t_1 = time.time()
             datos ="Nodos expandidos: "+str(it)+"\n"+"Longitud de la solución: "+str(len(listaSol))+"\n"+"Coste de la solución: "+ str(nActual.g)+"\n"
 
-            return [listaSol, datos, nActual.g]
+            return [listaSol, datos, nActual.g,t_1-t_0, it]
 
     def recuperaSolucionHPA(self, nodo,lista, malla):
         lista.append(nodo)

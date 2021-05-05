@@ -1,4 +1,6 @@
 import pickle
+import threading
+
 from Grafo import *
 from Mapas import *
 import numpy as np
@@ -7,15 +9,12 @@ import sys
 
 def main():
 
-    sys.setrecursionlimit(30000)
-
-
     directory = "mapas"
     number_of_files = len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
     listaMapas = []
     listaMapasHPA = []
-    for i in range(4, 6):
+    for i in range(1, 5):
 
         nombre = "BGMAP ("+str(i)+").map"
         mapa = leerMapa(nombre)
@@ -30,7 +29,7 @@ def main():
     pickle.dump(listaMapas, f)
     f.close()
 
-    c = open("mapasTratados\\mapasHPA1.txt", "wb")
+    c = open("mapasTratados\\mapasHPA4.txt", "wb")
     pickle.dump(listaMapasHPA, c)
     c.close()
     print("Leidos los mapas de la carpeta mapas")
@@ -56,7 +55,7 @@ def crearMapaHPA(nombre, m, grafo):
 
     mapa = m.copy()
     tamaños = divisores(len(mapa))
-    tamañoCluster = tamaños[5]  #32 es el tamaño de cluster con la pos 5
+    tamañoCluster = tamaños[2]  #32 es el tamaño de cluster con la pos 5
     pGrande = 12
 
     clusters = []
@@ -223,11 +222,14 @@ def añadirConexionesIntraClusters(agente, grafo, numClusters, tamCluster):
             while len(c)>1:
                 inicio = c.pop()
                 agente.inicial=NodoArbol(inicio.fila, inicio.columna)
-                resultados = agente.dijkstra(c, (inicio.fila//tamCluster)*tamCluster, (inicio.columna//tamCluster)*tamCluster, tamCluster)
+                resultados, it = agente.dijkstra(c, (inicio.fila//tamCluster)*tamCluster, (inicio.columna//tamCluster)*tamCluster, tamCluster)
                 if resultados!=None:
                     for r in resultados:
                         grafo.add_edge(inicio, r[0], r[2], r[1])
         return grafo
 
 if __name__ == '__main__':
-    main()
+    sys.setrecursionlimit(300000)
+    threading.stack_size(200000000)
+    thread = threading.Thread(target=main)
+    thread.start()
