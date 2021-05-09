@@ -276,22 +276,21 @@ def comparacionInsercion(pos, nPuntos):
     return "salidas/cInseSGTiempo.png", "salidas/cInseSGNExp.png"
 
 def creaPuntos(mapa, nPuntos):
-    listaInicio =[]
-    listaFinal = []
+    j = open("bancoPruebas\\"+mapa[0:len(mapa)-4]+".scen", "rb")
+    lista=pickle.load(j)
+    j.close()
     sep=25
 
+    listaFinal=[]
+    cont = 0
     while len(listaFinal)<nPuntos:
-        filaI = randint(0, mapa.dimensiones-1)
-        colI = randint(0, mapa.dimensiones-1)
+        coste = lista[cont][4]
 
-        filaF = randint(0, mapa.dimensiones-1)
-        colF = randint(0, mapa.dimensiones-1)
-
-        if mapa.mapa[filaI, colI]=='.' and mapa.mapa[filaF, colF]=='.' and sep-5 < abs(colI-colF)+abs(filaI-filaF) and abs(colI-colF)+abs(filaI-filaF)< sep+5:
-            listaInicio.append((filaI, colI))
-            listaFinal.append((filaF, colF))
+        if sep-2 < coste and coste < sep+2:
+            listaFinal.append(lista[cont])
             sep+=25
-    return listaInicio, listaFinal
+        cont+=1
+    return listaFinal
 
 def comparacionAHPA(pos, nPuntos):
     j = open("mapasTratados\\mapasHPA4.txt", "rb")
@@ -314,6 +313,7 @@ def comparacionAHPA(pos, nPuntos):
 
     tiemposA = []
     itsA=[]
+    dista = []
 
     tiemposHPA4 = []
     itsHPA4=[]
@@ -331,24 +331,22 @@ def comparacionAHPA(pos, nPuntos):
     itsHPA32=[]
     costesHPA32 = []
 
-    listaInicio, listaFinal = creaPuntos(mapa4, nPuntos)
-    cont=0
-    for pos in range(0, len(listaInicio)):
-        print(cont)
-        cont+=1
-        S=listaInicio[pos]
-        G=listaFinal[pos]
+    listaFinal = creaPuntos(mapa4.nombre, nPuntos)
 
-        filaS=S[0]
-        colS=S[1]
-        filaG=G[0]
-        colG=G[1]
+    for pos in listaFinal:
+        filaS=pos[0]
+        colS=pos[1]
+        filaG=pos[2]
+        colG=pos[3]
+
         mapaA = Mapa(mapa4.nombre, mapa4.dimensiones, mapa4.mapa.__copy__())
         resultadoA = calcularA(mapaA, filaS, colS, filaG, colG, Agente(), True)
         print("funciono en A")
         if resultadoA!= None:
-            tiemposA.append(NodoLista(resultadoA[2],resultadoA[0]))
-            itsA.append(NodoLista(resultadoA[2],resultadoA[1]))
+            tiemposA.append(resultadoA[0])
+            itsA.append(resultadoA[1])
+            #dista.append(resultadoA[2])
+            dista.append(pos[4])
 
             for i in [mapa4, mapa8, mapa16, mapa32]:
                 print("funciono antes de calcular hpa")
@@ -357,91 +355,28 @@ def comparacionAHPA(pos, nPuntos):
                 error = (abs(resultadoHPA[3]-resultadoA[3])/resultadoA[3])*100
                 if resultadoHPA!=None:
                     if i.tamCluster==4:
-                        tiemposHPA4.append(NodoLista(resultadoA[2], resultadoHPA[0]))
-                        itsHPA4.append(NodoLista(resultadoA[2], resultadoHPA[1]))
-                        costesHPA4.append(NodoLista(resultadoA[2], error))
+                        tiemposHPA4.append(resultadoHPA[0])
+                        itsHPA4.append(resultadoHPA[1])
+                        costesHPA4.append(error)
                     elif i.tamCluster==8:
-                        tiemposHPA8.append(NodoLista(resultadoA[2], resultadoHPA[0]))
-                        itsHPA8.append(NodoLista(resultadoA[2], resultadoHPA[1]))
-                        costesHPA8.append(NodoLista(resultadoA[2], error))
+                        tiemposHPA8.append(resultadoHPA[0])
+                        itsHPA8.append(resultadoHPA[1])
+                        costesHPA8.append(error)
                     elif i.tamCluster==16:
-                        tiemposHPA16.append(NodoLista(resultadoA[2], resultadoHPA[0]))
-                        itsHPA16.append(NodoLista(resultadoA[2], resultadoHPA[1]))
-                        costesHPA16.append(NodoLista(resultadoA[2], error))
+                        tiemposHPA16.append(resultadoHPA[0])
+                        itsHPA16.append(resultadoHPA[1])
+                        costesHPA16.append(error)
                     else:
-                        tiemposHPA32.append(NodoLista(resultadoA[2], resultadoHPA[0]))
-                        itsHPA32.append(NodoLista(resultadoA[2], resultadoHPA[1]))
-                        costesHPA32.append(NodoLista(resultadoA[2], error))
+                        tiemposHPA32.append(resultadoHPA[0])
+                        itsHPA32.append(resultadoHPA[1])
+                        costesHPA32.append(error)
                 print("funciono tras añadir las medidas")
 
-    tiemposHPA32.sort()
-    tiemposHPA16.sort()
-    tiemposHPA8.sort()
-    tiemposHPA4.sort()
-    tiemposA.sort()
-
-    itsHPA32.sort()
-    itsHPA16.sort()
-    itsHPA8.sort()
-    itsHPA4.sort()
-    itsA.sort()
-
-    costesHPA4.sort()
-    costesHPA8.sort()
-    costesHPA16.sort()
-    costesHPA32.sort()
-
-    t32 = []
-    t16= []
-    t8= []
-    t4= []
-    tA= []
-    it32= []
-    it16= []
-    it8= []
-    it4= []
-    itA= []
-    dista = []
-    """dist32= []
-    dist16= []
-    dist8= []
-    dist4= []"""
-    c32= []
-    c16= []
-    c8= []
-    c4= []
-    for i in range(0,len(tiemposHPA32)):
-        t32.append(tiemposHPA32[i].y)
-        #dist32.append(tiemposHPA32[i].x)
-        it32.append(itsHPA32[i].y)
-        c32.append(costesHPA32[i].y)
-    for i in range(0,len(tiemposHPA16)):
-        #dist16.append(tiemposHPA16[i].x)
-        t16.append(tiemposHPA16[i].y)
-        it16.append(itsHPA16[i].y)
-        c16.append(costesHPA16[i].y)
-    for i in range(0,len(tiemposHPA8)):
-        #dist8.append(tiemposHPA8[i].x)
-        t8.append(tiemposHPA8[i].y)
-        it8.append(itsHPA8[i].y)
-        c8.append(costesHPA8[i].y)
-    for i in range(0,len(tiemposHPA4)):
-        #dist4.append(tiemposHPA4[i].x)
-        t4.append(tiemposHPA4[i].y)
-        it4.append(itsHPA4[i].y)
-        c4.append(costesHPA4[i].y)
-    for i in range(0,len(tiemposA)):
-        tA.append(tiemposA[i].y)
-        itA.append(itsA[i].y)
-        dista.append(itsA[i].x)
-
-
-
-    plt.plot(dista,tA,  'o-', label="A*" )
-    plt.plot(dista ,t4 , "+-", label="HPA* TC:4")
-    plt.plot(dista, t8, "v-", label="HPA* TC:8")
-    plt.plot(dista, t16, "*-", label="HPA* TC:16")
-    plt.plot(dista, t32, "1-", label="HPA* TC:32")
+    plt.plot(dista, tiemposA,  'o-', label="A*" )
+    plt.plot(dista, tiemposHPA4 , "+-", label="HPA* TC:4")
+    plt.plot(dista, tiemposHPA8, "v-", label="HPA* TC:8")
+    plt.plot(dista, tiemposHPA16, "*-", label="HPA* TC:16")
+    plt.plot(dista, tiemposHPA32, "1-", label="HPA* TC:32")
     plt.xlabel("Profundidad de la solución")
     plt.ylabel("Tiempo de CPU")
     plt.title("Tiempo / Profundidad")
@@ -449,11 +384,11 @@ def comparacionAHPA(pos, nPuntos):
     plt.savefig("salidas/compAHPAT.png", dpi=300)
     plt.close()
 
-    plt.plot(dista,itA,  'o-', label="A*" )
-    plt.plot(dista ,it4 , "+-", label="HPA* TC:4")
-    plt.plot(dista, it8, "v-", label="HPA* TC:8")
-    plt.plot(dista, it16, "*-", label="HPA* TC:16")
-    plt.plot(dista, it32, "1-", label="HPA* TC:32")
+    plt.plot(dista, itsA,  'o-', label="A*" )
+    plt.plot(dista, itsHPA4 , "+-", label="HPA* TC:4")
+    plt.plot(dista, itsHPA8, "v-", label="HPA* TC:8")
+    plt.plot(dista, itsHPA16, "*-", label="HPA* TC:16")
+    plt.plot(dista, itsHPA32, "1-", label="HPA* TC:32")
     plt.xlabel("Profundidad de la solución")
     plt.ylabel("Nodos expandidos")
     plt.title("Nodos expandidos / Profundidad")
@@ -462,10 +397,10 @@ def comparacionAHPA(pos, nPuntos):
     plt.close()
 
 
-    plt.plot(dista ,c4 , "+-", label="HPA* TC:4")
-    plt.plot(dista, c8, "v-", label="HPA* TC:8")
-    plt.plot(dista, c16, "*-", label="HPA* TC:16")
-    plt.plot(dista, c32, "1-", label="HPA* TC:32")
+    plt.plot(dista ,costesHPA4 , "+-", label="HPA* TC:4")
+    plt.plot(dista, costesHPA8, "v-", label="HPA* TC:8")
+    plt.plot(dista, costesHPA16, "*-", label="HPA* TC:16")
+    plt.plot(dista, costesHPA32, "1-", label="HPA* TC:32")
     plt.xlabel("Profundidad de la solución")
     plt.ylabel("Porcentaje de error")
     plt.title("Porcentaje de error / Profundidad")

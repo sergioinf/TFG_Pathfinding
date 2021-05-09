@@ -7,14 +7,49 @@ import numpy as np
 import os
 import sys
 
+
 def main():
+    bancoPruebas()
+    #mapas()
+
+def bancoPruebas():
+    #directory = "bancoPruebasSinTratar"
+    #number_of_files = len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
+    numMapas = 5
+
+    for i in range(1,numMapas):
+        nombre = "BGMAP ("+str(i)+").scen"
+
+        fichero = open("bancoPruebasSinTratar\\"+nombre)
+        leido = fichero.readlines()
+        fichero.close()
+
+        listaPuntos = []
+        primera = True
+        for h in leido:
+            if not primera:
+                _,_,_,_,_,colI, filaI, colF, filaF, coste = h.split(",")
+                listaPuntos.append((int(filaI), int(colI), int(filaF), int(colF), float(coste)))
+            primera = False
+
+        f = open("bancoPruebas\\"+nombre, "wb")
+        pickle.dump(listaPuntos, f)
+        f.close()
+
+
+
+
+
+def mapas():
 
     directory = "mapas"
     number_of_files = len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
+    numMapas = 5
+
     listaMapas = []
     listaMapasHPA = []
-    for i in range(1, 5):
+    for i in range(1, numMapas):
 
         nombre = "BGMAP ("+str(i)+").map"
         mapa = leerMapa(nombre)
@@ -34,7 +69,6 @@ def main():
     c.close()
     print("Leidos los mapas de la carpeta mapas")
 
-
 def leerMapa(nombreFichero):
     fichero = open("mapas\\"+nombreFichero)
     leido = fichero.readlines()
@@ -49,7 +83,6 @@ def leerMapa(nombreFichero):
         j+=1
 
     return mapa
-
 
 def crearMapaHPA(nombre, m, grafo):
 
