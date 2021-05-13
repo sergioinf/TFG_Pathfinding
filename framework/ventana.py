@@ -15,10 +15,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.datosHPA.setText("Haz click en el botón para ejecutar HPA*")
         self.ejecutaHPA.setText("Púlsame")
 
+        self.datosHPA.setText("Haz click en el botón para ejecutar JSP")
+        self.ejecutaJSP.setText("Púlsame")
+
         self.ejecutaAEstrella.clicked.connect(self.actualizarAEstrella)
         self.ejecutaHPA.clicked.connect(self.actualizarHPA)
+        self.ejecutaJSP.clicked.connect(self.actualizarJSP)
+
         self.ejecutaInseSG.clicked.connect(self.cInseSG)
         self.ejecutarCompAHPA.clicked.connect(self.cAHPA)
+        self.ejecutarCompAJSP.clicked.connect(self.cJSP)
 
 
 
@@ -35,7 +41,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         j.close()
         nombresA = [k.nombre for k in self.listaA]
         self.mapasa.addItems(nombresA)
+        self.mapasJSP.addItems(nombresA)
+        self.mapasCompAJSP.addItems(nombresA)
 
+    def actualizarJSP(self):
+        self.datosJSP.setText("Ejecutando algoritmo, por favor espere")
+        posMapa = self.mapasJSP.currentIndex()
+        fI=self.filaIJSP.value()
+        cI=self.columnaIJSP.value()
+        fF=self.filaFJSP.value()
+        cF=self.columnaFJSP.value()
+
+        if self.listaA[posMapa].mapa[fI, cI]=='.' and self.listaA[posMapa].mapa[fF, cF]=='.':
+            escribir = calcularJSP(self.listaA[posMapa], fI, cI, fF, cF, Agente(), False)
+
+            if escribir == None:
+                self.datosJSP.setText("Error, no se encuentra camino entre los puntos introducidos")
+            else:
+                self.datosJSP.setText(escribir[0])
+                self.mapaJSP.setPixmap(QtGui.QPixmap(escribir[1]))
+        elif self.listaA[posMapa].mapa[fI, cI]=='.':
+            self.datosJSP.setText("Error, el punto de destino no esta en una posicion válida")
+        else:
+            self.datosJSP.setText("Error, el punto de origen no esta en una posicion válida")
 
     def actualizarAEstrella(self):
         self.datosAEstrella.setText("Ejecutando algoritmo, por favor espere")
@@ -44,11 +72,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         cI=self.columnaIA.value()
         fF=self.filaFA.value()
         cF=self.columnaFA.value()
-        print(self.listaA[posMapa].mapa[fI, cI])
-        print(self.listaA[posMapa].mapa[fF, cF])
 
         if self.listaA[posMapa].mapa[fI, cI]=='.' and self.listaA[posMapa].mapa[fF, cF]=='.':
-            print("entro en el if")
             escribir = calcularA(self.listaA[posMapa], fI, cI, fF, cF, Agente(), False)
 
             if escribir == None:
@@ -93,9 +118,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def cAHPA(self):
         posMapa = self.mapascInseSG.currentIndex()
         nPuntos = 20
-        tiempo, exp = comparacionAHPA(posMapa, nPuntos)
+        tiempo, exp, err = comparacionAHPA(posMapa, nPuntos)
         self.graficoCompAHPAT.setPixmap(QtGui.QPixmap(tiempo))
         self.graficoCompAHPAN.setPixmap(QtGui.QPixmap(exp))
+        self.graficoErrorHPA.setPixmap(QtGui.QPixmap(err))
+
+    def cJSP(self):
+        posMapa = self.mapasCompAJSP.currentIndex()
+        nPuntos = 20
+        tiempo, exp = comparacionAJSP(posMapa, nPuntos)
+        self.graficoCompAJSPT.setPixmap(QtGui.QPixmap(tiempo))
+        self.graficoCompAJSPN.setPixmap(QtGui.QPixmap(exp))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

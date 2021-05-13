@@ -79,6 +79,54 @@ class Agente:
 
             return [listaSol, datos, nActual.g, t_1-t_0, it]
 
+    def JSP(self):
+        t_0 = time.time()
+        longitud = len(self.mapa)
+        malla = np.empty([longitud, longitud], dtype=NodoArbol)
+        abiertos = [self.inicial]
+        it=0
+        exito=False
+        while len(abiertos)>0 :
+        #while it==0:
+            it+=1
+            nActual = abiertos.pop()
+            malla[nActual.fila, nActual.columna]=nActual
+
+            if self.esFinal(nActual) :
+                exito = True
+                break
+
+            sucesores = nActual.calculaSucesoresJPS(self.mapa, self.objetivo)
+
+            for n2 in sucesores :
+                if malla[n2.fila, n2.columna]==None and abiertos.count(n2)==0 :
+                    abiertos.append(n2)
+                elif malla[n2.fila, n2.columna]!=None:
+                    n2viejo = malla[n2.fila, n2.columna]
+                    if n2.g<n2viejo.g:
+                        malla[n2.fila, n2.columna]=None
+                        abiertos.append(n2)
+                else:
+                    indice = abiertos.index(n2)
+                    n2viejo = abiertos.pop(indice)
+                    if n2.g<n2viejo.g:
+                        abiertos.append(n2)
+                    else:
+                        abiertos.append(n2viejo)
+
+            abiertos.sort(reverse = True)
+
+
+        if exito==False :
+            #t_1=time.time()
+            return None
+        else :
+            listaSol = self.recuperaSolucion(nActual, [], malla)
+            t_1 = time.time()
+            datos ="Nodos expandidos: "+str(it)+"\n"+"Longitud de la solución: "+str(len(listaSol))+"\n"+"Coste de la solución: "+ str(nActual.g)+"\n"
+
+            return [listaSol, datos, nActual.g, t_1-t_0, it]
+
     def dijkstra(self, listaObjetivos, fIC, cIC, tamCluster):
         nActual = self.inicial
         malla = np.empty([len(self.mapa), len(self.mapa)], dtype=NodoArbol)
@@ -129,7 +177,6 @@ class Agente:
         return (0, False)
 
     def hpaEstrella(self, grafo):
-        t_0 = time.time()
         longitud = len(self.mapa)
         malla = np.empty([longitud, longitud], dtype=NodoArbol)
         abiertos = [self.inicial]
@@ -168,7 +215,6 @@ class Agente:
             return None
         else :
             listaNodos = self.recuperaSolucionHPA(nActual,[], malla)
-            print("")
             listaSol = []
 
             for i in range(0, len(listaNodos)-1):
@@ -178,10 +224,9 @@ class Agente:
                 if sig == None:
                     sig = nodo2.get_camino(nodo1)
                 listaSol = listaSol+sig
-            t_1 = time.time()
             datos ="Nodos expandidos: "+str(it)+"\n"+"Longitud de la solución: "+str(len(listaSol))+"\n"+"Coste de la solución: "+ str(nActual.g)+"\n"
 
-            return [listaSol, datos, nActual.g,t_1-t_0, it]
+            return [listaSol, datos, nActual.g,it]
 
     def recuperaSolucionHPA(self, nodo,lista, malla):
         lista.append(nodo)

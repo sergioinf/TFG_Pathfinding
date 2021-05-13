@@ -18,11 +18,11 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="aEstrella">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>A*</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
@@ -120,7 +120,7 @@
       </widget>
       <widget class="QWidget" name="hpaEstrella">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>HPA*</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -216,12 +216,110 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="JSP">
+       <attribute name="title">
+        <string>JSP</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <layout class="QGridLayout" name="gridLayoutJSP">
+          <item row="4" column="0">
+           <widget class="QLabel" name="mapaJSPText">
+            <property name="text">
+             <string>Mapa</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="columnaFJSPText">
+            <property name="text">
+             <string>Columna final</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="filaFJSPText">
+            <property name="text">
+             <string>Fila final</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="columnaIJSPText">
+            <property name="text">
+             <string>Columna inicial</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="filaIJSPText">
+            <property name="text">
+             <string>Fila inicial</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="columnaIJSP">
+            <property name="maximum">
+             <number>511</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="filaFJSP">
+            <property name="maximum">
+             <number>511</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="columnaFJSP">
+            <property name="maximum">
+             <number>511</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="mapasJSP"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="filaIJSP">
+            <property name="maximum">
+             <number>511</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" rowspan="2" colspan="2">
+           <widget class="QLabel" name="datosJSP">
+            <property name="text">
+             <string>Ejecuta el programa para JSP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0" colspan="2">
+           <widget class="QPushButton" name="ejecutaJSP">
+            <property name="text">
+             <string>Ejecutar</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4" rowspan="8">
+           <widget class="QLabel" name="mapaJSP">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="comparacion">
        <attribute name="title">
-        <string>Page</string>
+        <string>Comparaciones</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
          <widget class="QScrollArea" name="scrollArea">
           <property name="widgetResizable">
            <bool>true</bool>
@@ -307,7 +405,7 @@
                </widget>
               </item>
               <item row="0" column="0" colspan="3">
-               <widget class="QLabel" name="label">
+               <widget class="QLabel" name="cAHPAText">
                 <property name="font">
                  <font>
                   <family>Arial</family>
@@ -333,6 +431,64 @@
             </item>
             <item>
              <widget class="QLabel" name="graficoCompAHPAN">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="graficoErrorHPA">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="1" column="1">
+               <widget class="QComboBox" name="mapasCompAJSP"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="mapasCompAJSPText">
+                <property name="text">
+                 <string>Mapa</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="ejecutarCompAJSP">
+                <property name="text">
+                 <string>Ejecutar</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="3">
+               <widget class="QLabel" name="cAJSPText">
+                <property name="font">
+                 <font>
+                  <family>Arial</family>
+                  <pointsize>14</pointsize>
+                  <weight>75</weight>
+                  <italic>true</italic>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Comparacion entre A* y JSP</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="graficoCompAJSPN">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="graficoCompAJSPT">
               <property name="text">
                <string/>
               </property>

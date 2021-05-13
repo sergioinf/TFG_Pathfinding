@@ -2,8 +2,7 @@ import pickle
 import time
 from random import random, randint
 from Mapas import *
-from PIL import Image
-import TratadorMapas
+import cv2 as cv
 import matplotlib.pyplot as plt
 from Agente import *
 
@@ -11,15 +10,8 @@ from Nodos import *
 
 def calcularA(mapaIntroducido, fI, cIni, fF, cF, agente, comp):
 
-    """j = open("mapasTratados\\mapasBase1.txt", "rb")
-    listamapas=pickle.load(j)
-    j.close()
-
-    mapa = listamapas[3]"""
     mapa = mapaIntroducido.__copy__()
 
-    """inicial = NodoArbol(197, 319)
-    final = NodoArbol(201,87)"""
 
     inicial = NodoArbol(fI, cIni)
     final = NodoArbol(fF, cF)
@@ -66,13 +58,11 @@ def calcularA(mapaIntroducido, fI, cIni, fF, cF, agente, comp):
         return None
 
 def calcularHPA(mapaIntroducido, fI, cIni, fF, cF, comp):
-    """j = open("mapasTratados\\mapasHPA32.txt", "rb")
-    lista=pickle.load(j)
-    mapa = lista[3]
-    j.close()"""
     mapa = mapaIntroducido.__copy__()
 
     g = mapa.grafoAbstracto.__copy__()
+
+    t_0 = time.time()
 
     numClustersPorFila = mapa.dimensiones//mapa.tamCluster
     cI = (fI // mapa.tamCluster)*numClustersPorFila+(cIni // mapa.tamCluster)
@@ -93,21 +83,16 @@ def calcularHPA(mapaIntroducido, fI, cIni, fF, cF, comp):
     agente = Agente(m = mapa.mapa)
 
 
-    print("Empieza dijkstra para I")
     agente.inicial = NodoArbol(inicial.fila, inicial.columna)
     resultadosI, it = agente.dijkstra(I, (inicial.fila//mapa.tamCluster)*mapa.tamCluster, (inicial.columna//mapa.tamCluster)*mapa.tamCluster, mapa.tamCluster)
-    print("Empieza dijkstra para D")
+
     agente.inicial = NodoArbol(final.fila, final.columna)
     resultadosD, it = agente.dijkstra(D, (final.fila//mapa.tamCluster)*mapa.tamCluster, (final.columna//mapa.tamCluster)*mapa.tamCluster, mapa.tamCluster)
 
     if resultadosI!=None:
-        print("resultados I")
         for r in resultadosI:
             fila = r[0].fila
             columna = r[0].columna
-            """print(fila)
-            print(columna)
-            print("")"""
             n = g.get_verticeComp(fila, columna).id
             g.add_edge(inicial, n, r[2], r[1])
             #g.add_edge(n, inicial, r[2], r[1])
@@ -115,7 +100,6 @@ def calcularHPA(mapaIntroducido, fI, cIni, fF, cF, comp):
 
 
     if resultadosD!=None:
-        print("resultados D")
         for r in resultadosD:
             fila = r[0].fila
             columna = r[0].columna
@@ -134,9 +118,10 @@ def calcularHPA(mapaIntroducido, fI, cIni, fF, cF, comp):
     agente.inicial = NodoArbol(fila=inicial.fila, columna=inicial.columna)
     agente.objetivo = NodoArbol(fila=final.fila, columna=final.columna)
     resultado = agente.hpaEstrella(g)
+    t_1 = time.time()
     if resultado != None:
         if comp == False:
-            camino, datos, costeTotal, t, it = resultado
+            camino, datos, costeTotal, it = resultado
 
 
             for i in camino:
@@ -163,6 +148,64 @@ def calcularHPA(mapaIntroducido, fI, cIni, fF, cF, comp):
             plt.imsave("salidas\\imagenHPA.jpg", mapa2, cmap='Greys')
             ventana=[datos, "salidas\\imagenHPA.jpg"]
 
+            return ventana
+        else:
+            return [t_1-t_0, resultado[3], len(resultado[0]), resultado[2]]
+    else:
+        return None
+
+def calcularJSP(mapaIntroducido, fI, cIni, fF, cF, agente, comp):
+    mapa = mapaIntroducido.__copy__()
+
+    inicial = NodoArbol(fI, cIni)
+    final = NodoArbol(fF, cF)
+
+    agente.inicial=inicial
+    agente.objetivo=final
+    agente.mapa = mapa.mapa
+
+    resultado = agente.JSP()
+
+    if resultado != None:
+        if comp==False:
+            listaSol = resultado[0]
+
+            mapaEscribir = mapa.__copy__()
+
+            for i in listaSol:
+                mapaEscribir.mapa[i.fila, i.columna]="X"
+
+            f= open("salidas\\solucionJSP.txt", "w")
+
+            for i in range(0, 512):
+                f.write(''.join(mapaEscribir.mapa[i,:]))
+                f.write("\n")
+            f.close()
+
+            mapa2 = np.empty([mapaEscribir.dimensiones, mapaEscribir.dimensiones], dtype=int)
+
+            for i in range(0, 512):
+                for j in range(0, 512):
+                    if mapaEscribir.mapa[i,j]=='@':
+                        mapa2[i,j]=255
+                    elif mapaEscribir.mapa[i,j]=='.':
+                        mapa2[i,j]=0
+                    else:
+                        mapa2[i,j] =ord(mapaEscribir.mapa[i,j])
+
+            #plt.imsave("salidas\\imagenJSP.jpg", mapa2, cmap='Greys')
+
+
+            mapa2 = np.uint8(mapa2)
+
+            mapa2 = cv.cvtColor(mapa2, cv.COLOR_GRAY2BGR)
+
+            for i in range(1, len(listaSol)):
+                #mapita.mapa[i.fila, i.columna]="X"
+                mapa2 = cv.line(mapa2,(listaSol[i-1].columna, listaSol[i-1].fila), (listaSol[i].columna, listaSol[i].fila), color=(255, 255, 255), thickness=1)
+
+            cv.imwrite("salidas\\imagenJSP.jpg", mapa2)
+            ventana=[resultado[1], "salidas\\imagenJSP.jpg"]
             return ventana
         else:
             return [resultado[3], resultado[4], len(resultado[0]), resultado[2]]
@@ -341,7 +384,7 @@ def comparacionAHPA(pos, nPuntos):
 
         mapaA = Mapa(mapa4.nombre, mapa4.dimensiones, mapa4.mapa.__copy__())
         resultadoA = calcularA(mapaA, filaS, colS, filaG, colG, Agente(), True)
-        print("funciono en A")
+        print("Peto aqui")
         if resultadoA!= None:
             tiemposA.append(resultadoA[0])
             itsA.append(resultadoA[1])
@@ -349,9 +392,8 @@ def comparacionAHPA(pos, nPuntos):
             dista.append(pos[4])
 
             for i in [mapa4, mapa8, mapa16, mapa32]:
-                print("funciono antes de calcular hpa")
+
                 resultadoHPA = calcularHPA(i, filaS, colS, filaG, colG, True)
-                print("funciono tras hpa")
                 error = (abs(resultadoHPA[3]-resultadoA[3])/resultadoA[3])*100
                 if resultadoHPA!=None:
                     if i.tamCluster==4:
@@ -370,7 +412,6 @@ def comparacionAHPA(pos, nPuntos):
                         tiemposHPA32.append(resultadoHPA[0])
                         itsHPA32.append(resultadoHPA[1])
                         costesHPA32.append(error)
-                print("funciono tras añadir las medidas")
 
     plt.plot(dista, tiemposA,  'o-', label="A*" )
     plt.plot(dista, tiemposHPA4 , "+-", label="HPA* TC:4")
@@ -408,4 +449,61 @@ def comparacionAHPA(pos, nPuntos):
     plt.savefig("salidas/compAHPAErr.png", dpi=300)
     plt.close()
 
-    return "salidas/compAHPAT.png", "salidas/compAHPAEXP.png"
+    return "salidas/compAHPAT.png", "salidas/compAHPAEXP.png", "salidas/compAHPAErr.png"
+
+def comparacionAJSP(pos, nPuntos):
+    j = open("mapasTratados\\mapasBase1.txt", "rb")
+    lista=pickle.load(j)
+    mapa = lista[pos]
+
+    tiemposA = []
+    itsA=[]
+    dista = []
+
+    tiemposJSP = []
+    itsJSP=[]
+    distJSP = []
+
+    listaFinal = creaPuntos(mapa.nombre, nPuntos)
+
+    for pos in listaFinal:
+        filaS=pos[0]
+        colS=pos[1]
+        filaG=pos[2]
+        colG=pos[3]
+
+        mapaA = Mapa(mapa.nombre, mapa.dimensiones, mapa.mapa.__copy__())
+        resultadoA = calcularA(mapaA, filaS, colS, filaG, colG, Agente(), True)
+        resultadoJSP = calcularJSP(mapaA, filaS, colS, filaG, colG, Agente(), True)
+        if resultadoA!= None:
+            tiemposA.append(resultadoA[0])
+            itsA.append(resultadoA[1])
+            #dista.append(resultadoA[2])
+            dista.append(pos[4])
+
+            tiemposJSP.append(resultadoJSP[0])
+            itsJSP.append(resultadoJSP[1])
+            #dista.append(resultadoJSP[2])
+            distJSP.append(pos[4])
+
+
+
+    plt.plot(dista, tiemposA,  'o-', label="A*" )
+    plt.plot(dista, tiemposJSP, "+-", label="JSP")
+    plt.xlabel("Profundidad de la solución")
+    plt.ylabel("Tiempo de CPU")
+    plt.title("Tiempo / Profundidad")
+    plt.legend()
+    plt.savefig("salidas/compAJSPT.png", dpi=300)
+    plt.close()
+
+    plt.plot(dista, itsA,  'o-', label="A*" )
+    plt.plot(dista, itsJSP, "+-", label="HPA* TC:4")
+    plt.xlabel("Profundidad de la solución")
+    plt.ylabel("Nodos expandidos")
+    plt.title("Nodos expandidos / Profundidad")
+    plt.legend()
+    plt.savefig("salidas/compAJSPEXP.png", dpi=300)
+    plt.close()
+
+    return "salidas/compAJSPT.png", "salidas/compAJSPEXP.png"
